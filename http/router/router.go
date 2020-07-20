@@ -24,7 +24,7 @@ func InitRouter() chi.Router {
 	authGroup.Use(authMiddleware)
 	authGroup.Get("/api/projects", controllers.GetAllProjects)
 	authGroup.Post("/api/projects", controllers.CreateProject)
-	//authGroup.Patch("/api/projects/{id}", controllers.UpdateProject)
+	authGroup.Patch("/api/projects/{id}", controllers.UpdateProject)
 	authGroup.Get("/api/projects/{id}", controllers.GetOneProject)
 	authGroup.Delete("/api/projects/{id}", controllers.DeleteProject)
 

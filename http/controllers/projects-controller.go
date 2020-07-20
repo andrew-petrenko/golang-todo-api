@@ -22,7 +22,7 @@ func GetAllProjects(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateProject(w http.ResponseWriter, r *http.Request) {
-	utils.WriteResponse(w, br.NewResponse(nil, true), http.StatusNoContent)
+	utils.WriteResponse(w, br.NewResponse(nil, true), http.StatusNotImplemented)
 }
 
 func GetOneProject(w http.ResponseWriter, r *http.Request) {
@@ -41,6 +41,10 @@ func GetOneProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteResponse(w, br.NewResponse(project, true), http.StatusOK)
+}
+
+func UpdateProject(w http.ResponseWriter, r *http.Request) {
+	utils.WriteResponse(w, br.NewResponse(nil, false), http.StatusNotImplemented)
 }
 
 func DeleteProject(w http.ResponseWriter, r *http.Request) {

@@ -29,7 +29,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		utils.WriteResponse(w, br.NewResponse("Failed to read request body", false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Failed to read request body"}, false), http.StatusInternalServerError)
 		return
 	}
 
@@ -73,7 +73,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		utils.WriteResponse(w, br.NewResponse("Failed to read request body", false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Failed to read request body"}, false), http.StatusInternalServerError)
 		return
 	}
 
@@ -88,12 +88,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(user) < 1 {
-		utils.WriteResponse(w, br.NewResponse("User not found", false), http.StatusNotFound)
+		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "User not found"}, false), http.StatusNotFound)
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user[0].Password), []byte(aur.Password)); err != nil {
-		utils.WriteResponse(w, br.NewResponse("Incorrect password", false), http.StatusForbidden)
+		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Incorrect password"}, false), http.StatusForbidden)
 		return
 	}
 
