@@ -2,15 +2,14 @@ package repositories
 
 import (
 	"github.com/andrew-petrenko/golang-todo-api/models"
-	"github.com/andrew-petrenko/golang-todo-api/utils"
 )
 
 type UserRepository struct {
-	connector *utils.DbConnection
+	repository
 }
 
 func (ur *UserRepository) CreateUser(user *models.User) error {
-	db, err := ur.connector.GetConnection()
+	db, err := ur.GetDB()
 	if err != nil {
 		return err
 	}
@@ -22,7 +21,7 @@ func (ur *UserRepository) CreateUser(user *models.User) error {
 }
 
 func (ur *UserRepository) GetByCriteria(criteria string, values ...string) ([]models.User, error) {
-	db, err := ur.connector.GetConnection()
+	db, err := ur.GetDB()
 	if err != nil {
 		return nil, err
 	}

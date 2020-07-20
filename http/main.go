@@ -9,7 +9,7 @@ import (
 )
 
 func InitHttpServer() error {
-	connectionString := parseEnvFile()
+	connectionString := defineConnectionString()
 	if err := http.ListenAndServe(connectionString, router.InitRouter()); err != nil {
 		return err
 	}
@@ -17,7 +17,7 @@ func InitHttpServer() error {
 	return nil
 }
 
-func parseEnvFile() string {
+func defineConnectionString() string {
 	host := os.Getenv("APP_HOST")
 	if host == "" {
 		log.Fatal("APP_HOST can not be empty")
