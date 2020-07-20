@@ -36,7 +36,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		strArr := strings.Split(authHeader, " ")
 		if len(strArr) != 2 {
-			utils.WriteResponse(w, br.NewResponse("Низя, сорян", false), http.StatusForbidden)
+			utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Forbidden"}, false), http.StatusForbidden)
 			return
 		}
 
@@ -48,7 +48,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		})
 
 		if err != nil {
-			utils.WriteResponse(w, br.NewResponse("Низя, сорян", false), http.StatusForbidden)
+			utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Forbidden"}, false), http.StatusForbidden)
 			return
 		}
 
