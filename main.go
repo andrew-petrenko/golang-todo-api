@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/andrew-petrenko/golang-todo-api/http"
+	_ "github.com/joho/godotenv/autoload"
 	"log"
 )
 

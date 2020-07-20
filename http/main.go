@@ -3,7 +3,6 @@ package http
 import (
 	"fmt"
 	"github.com/andrew-petrenko/golang-todo-api/http/router"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
@@ -19,11 +18,6 @@ func InitHttpServer() error {
 }
 
 func parseEnvFile() string {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	host := os.Getenv("APP_HOST")
 	if host == "" {
 		log.Fatal("APP_HOST can not be empty")

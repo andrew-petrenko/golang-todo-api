@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 	"os"
 )
@@ -26,11 +25,6 @@ func (dbC *DbConnection) GetConnection() (*gorm.DB, error) {
 }
 
 func (dbC *DbConnection) parseEnvFile() (string, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return "", errors.New("Failed to load .env file")
-	}
-
 	dbHost := os.Getenv("DB_HOST")
 	if dbHost == "" {
 		return "", errors.New("DB_HOST should be defined in .env")
