@@ -1,6 +1,6 @@
 package resources
 
-type AuthenticatedUser struct {
+type AuthenticatedUserResource struct {
 	Id    uint   `json:"id"`
 	Token string `json:"token"`
 }

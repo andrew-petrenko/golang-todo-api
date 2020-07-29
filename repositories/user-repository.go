@@ -8,7 +8,7 @@ type UserRepository struct {
 	repository
 }
 
-func (ur *UserRepository) CreateUser(user *models.User) error {
+func (ur *UserRepository) Store(user *models.User) error {
 	db, err := ur.GetDB()
 	if err != nil {
 		return err
@@ -20,15 +20,15 @@ func (ur *UserRepository) CreateUser(user *models.User) error {
 	return nil
 }
 
-func (ur *UserRepository) GetByCriteria(criteria string, values ...string) ([]models.User, error) {
+func (ur *UserRepository) FindOneByCriteria(criteria string, values ...string) (*models.User, error) {
 	db, err := ur.GetDB()
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	var users []models.User
-	db.Where(criteria, values).Find(&users)
+	var user models.User
+	db.Where(criteria, values).First(&user)
 
-	return users, err
+	return &user, nil
 }
