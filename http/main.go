@@ -18,15 +18,10 @@ func InitHttpServer() error {
 }
 
 func defineConnectionString() string {
-	host := os.Getenv("APP_HOST")
-	if host == "" {
-		log.Fatal("APP_HOST can not be empty")
-	}
-
 	port := os.Getenv("APP_PORT")
 	if port == "" {
 		log.Fatal("APP_PORT can not be empty")
 	}
 
-	return fmt.Sprintf("%s:%s", host, port)
+	return fmt.Sprintf(":%s", port)
 }

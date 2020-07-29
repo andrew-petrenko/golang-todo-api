@@ -17,6 +17,11 @@ func InitRouter() chi.Router {
 
 	r.Get("/api/test", controllers.Test)
 
+	// todo remove that test stuff
+	r.Get("/api/ping", func(w http.ResponseWriter, r *http.Request) {
+		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "pong"}, true), http.StatusTeapot)
+	})
+
 	r.Post("/api/auth/register", controllers.Register)
 	r.Post("/api/auth/login", controllers.Login)
 

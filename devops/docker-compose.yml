@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  backend:
+    container_name: backend-app
+    build:
+      context: ../../golang-todo-api
+      dockerfile: devops/Dockerfile
+    env_file:
+      - ../.env
+    ports:
+      - ${APP_PORT}:${APP_PORT}
