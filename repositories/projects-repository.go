@@ -2,16 +2,15 @@ package repositories
 
 import (
 	"github.com/andrew-petrenko/golang-todo-api/http/resources"
+	"github.com/andrew-petrenko/golang-todo-api/models"
 )
-
-//TODO why the hell I return resources?
 
 type ProjectRepository struct {
 	repository
 }
 
-func (pr *ProjectRepository) GetAll() (*[]resources.Project, error) {
-	var projects []resources.Project
+func (pr *ProjectRepository) FindAll() ([]models.Project, error) {
+	var projects []models.Project
 	db, err := pr.GetDB()
 	if err != nil {
 		return nil, err
@@ -21,11 +20,11 @@ func (pr *ProjectRepository) GetAll() (*[]resources.Project, error) {
 
 	db.Find(&projects)
 
-	return &projects, nil
+	return projects, nil
 }
 
-func (pr *ProjectRepository) GetById(id int) (*[]resources.Project, error) {
-	var project []resources.Project
+func (pr *ProjectRepository) FindOneById(id int) (*models.Project, error) {
+	var project models.Project
 	db, err := pr.GetDB()
 	if err != nil {
 		return nil, err
@@ -44,7 +43,7 @@ func (pr *ProjectRepository) Delete(id int) error {
 	}
 	defer db.Close()
 
-	db.Delete(&resources.Project{}, id)
+	db.Delete(&resources.ProjectResource{}, id)
 
 	return nil
 }

@@ -11,3 +11,10 @@ func NewResponse(data interface{}, success bool) *Response {
 		Data:    data,
 	}
 }
+
+func NewResponseErrorMessage(message string) *Response {
+	return &Response{
+		Success: false,
+		Data:    map[string]string{"message": message},
+	}
+}

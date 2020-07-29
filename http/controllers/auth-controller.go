@@ -29,13 +29,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Failed to read request body"}, false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponseErrorMessage("Failed to read request body"), http.StatusInternalServerError)
 		return
 	}
 
 	var registerRequest RegisterUserRequest
 	if err := json.Unmarshal(reqBody, &registerRequest); err != nil {
-		utils.WriteResponse(w, br.NewResponse(err.Error(), false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -53,18 +53,18 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		Email:    registerRequest.Email,
 		Password: registerRequest.Password,
 	}
-	if err = userRepo.CreateUser(user); err != nil {
-		utils.WriteResponse(w, br.NewResponse(err.Error(), false), http.StatusInternalServerError)
+	if err = userRepo.Store(user); err != nil {
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
 		return
 	}
 
 	token, err := utils.GenerateJwtToken(user.Id)
 	if err != nil {
-		utils.WriteResponse(w, br.NewResponse(err.Error(), false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
 		return
 	}
 
-	utils.WriteResponse(w, br.NewResponse(resources.AuthenticatedUser{
+	utils.WriteResponse(w, br.NewResponse(resources.AuthenticatedUserResource{
 		Id:    user.Id,
 		Token: token,
 	}, true), http.StatusCreated)
@@ -73,7 +73,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Failed to read request body"}, false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponseErrorMessage("Failed to read request body"), http.StatusInternalServerError)
 		return
 	}
 
@@ -81,30 +81,30 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &aur)
 
 	var ur repositories.UserRepository
-	user, err := ur.GetByCriteria("email = ?", aur.Email)
+	user, err := ur.FindOneByCriteria("email = ?", aur.Email)
 	if err != nil {
-		utils.WriteResponse(w, br.NewResponse(err.Error(), false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
 		return
 	}
 
-	if len(user) < 1 {
-		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "User not found"}, false), http.StatusNotFound)
+	if user.Id == 0 {
+		utils.WriteResponse(w, br.NewResponseErrorMessage("User not found"), http.StatusNotFound)
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user[0].Password), []byte(aur.Password)); err != nil {
-		utils.WriteResponse(w, br.NewResponse(map[string]string{"message": "Incorrect password"}, false), http.StatusForbidden)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(aur.Password)); err != nil {
+		utils.WriteResponse(w, br.NewResponseErrorMessage("Incorrect password"), http.StatusForbidden)
 		return
 	}
 
-	token, err := utils.GenerateJwtToken(user[0].Id)
+	token, err := utils.GenerateJwtToken(user.Id)
 	if err != nil {
-		utils.WriteResponse(w, br.NewResponse(err.Error(), false), http.StatusInternalServerError)
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
 		return
 	}
 
-	utils.WriteResponse(w, br.NewResponse(resources.AuthenticatedUser{
-		Id:    user[0].Id,
+	utils.WriteResponse(w, br.NewResponse(resources.AuthenticatedUserResource{
+		Id:    user.Id,
 		Token: token,
 	}, true), http.StatusOK)
 }
