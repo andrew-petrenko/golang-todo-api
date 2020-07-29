@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"github.com/andrew-petrenko/golang-todo-api/http/resources"
 	"github.com/andrew-petrenko/golang-todo-api/models"
 )
 
@@ -43,7 +42,7 @@ func (pr *ProjectRepository) Delete(id int) error {
 	}
 	defer db.Close()
 
-	db.Delete(&resources.ProjectResource{}, id)
+	db.Delete(&models.Project{}, id)
 
 	return nil
 }
