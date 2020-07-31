@@ -9,21 +9,25 @@ import (
 	"github.com/andrew-petrenko/golang-todo-api/utils"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/validator.v2"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 )
 
+// TODO add email validation
+
 type RegisterUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name" validate:"min=1,max=255"`
+	Email    string `json:"email" validate:"min=1"`
+	Password string `json:"password" validate:"min=8,max=32"`
 }
 
 type AuthUserRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"min=1"`
+	Password string `json:"password" validate:"min=8,max=32"`
 }
+
+var userRepo repositories.UserRepository
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -39,21 +43,17 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var errorBag utils.ValidationErrorBag
-	validateRegisterUserRequest(&registerRequest, &errorBag)
-
-	if errorBag.ContainsErrors() {
-		utils.WriteResponse(w, br.NewResponse(errorBag, false), http.StatusUnprocessableEntity)
+	if err := validator.Validate(registerRequest); err != nil {
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusUnprocessableEntity)
 		return
 	}
 
-	var userRepo repositories.UserRepository
 	user := &models.User{
 		Name:     registerRequest.Name,
 		Email:    registerRequest.Email,
 		Password: registerRequest.Password,
 	}
-	if err = userRepo.Store(user); err != nil {
+	if err = userRepo.Create(user); err != nil {
 		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
 		return
 	}
@@ -78,12 +78,19 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var aur AuthUserRequest
-	json.Unmarshal(reqBody, &aur)
+	if err := json.Unmarshal(reqBody, &aur); err != nil {
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
+		return
+	}
 
-	var ur repositories.UserRepository
-	user, err := ur.FindOneByCriteria("email = ?", aur.Email)
+	user, err := userRepo.FindOneByCriteria("email = ?", aur.Email)
 	if err != nil {
 		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	if err := validator.Validate(aur); err != nil {
+		utils.WriteResponse(w, br.NewResponseErrorMessage(err.Error()), http.StatusUnprocessableEntity)
 		return
 	}
 
@@ -107,36 +114,4 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Id:    user.Id,
 		Token: token,
 	}, true), http.StatusOK)
-}
-
-func validateRegisterUserRequest(requestData *RegisterUserRequest, errorBag *utils.ValidationErrorBag) {
-	if requestData.Name == "" {
-		errorBag.AddError("name", "Name can not be empty")
-	}
-
-	if len(requestData.Name) < 2 {
-		errorBag.AddError("name", "Name should be at least 2 characters")
-	}
-
-	if len(requestData.Name) > 255 {
-		errorBag.AddError("name", "Name should be less then 255 characters")
-	}
-
-	if requestData.Email == "" {
-		errorBag.AddError("email", "Email can not be empty")
-	}
-
-	re, _ := regexp.Compile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
-	if !re.MatchString(requestData.Email) || len(requestData.Email) > 255 {
-		errorBag.AddError("email", "There is an error in email address")
-	}
-
-	if requestData.Password == "" {
-		errorBag.AddError("password", "Password can not be empty")
-	}
-
-	if len(requestData.Password) < 8 {
-		errorBag.AddError("password", "Password must be at least 8 characters")
-	}
 }

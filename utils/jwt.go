@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+type AuthClaims struct {
+	UserId     uint
+	Authorized bool
+	*jwt.StandardClaims
+}
+
 func GenerateJwtToken(userId uint) (string, error) {
 	aud := os.Getenv("JWT_AUDIENCE")
 	if aud == "" {
@@ -18,11 +24,15 @@ func GenerateJwtToken(userId uint) (string, error) {
 		return "", errors.New("JWT_SECRET can not be empty")
 	}
 
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = userId
-	claims["aud"] = aud
-	claims["exp"] = time.Now().Add(time.Minute * 36600).Unix()
+	claims := &AuthClaims{
+		UserId:     userId,
+		Authorized: true,
+		StandardClaims: &jwt.StandardClaims{
+			Audience:  aud,
+			ExpiresAt: time.Now().Add(time.Minute * 36600).Unix(),
+		},
+	}
+
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	token, err := at.SignedString([]byte(secret))
